@@ -3,8 +3,14 @@
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
 
-from . import KuckaApp
-import fire
+from . import Kucka
+import sys
+
+def main():
+    if len(sys.argv) == 2:
+        kucka = Kucka(sys.argv[1])
+    else:
+        kucka = Kucka()
 
 if __name__ == "__main__":
-    fire.Fire(KuckaApp)
+    main()

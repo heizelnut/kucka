@@ -11,10 +11,15 @@ def get_file_conts(file):
     
     return contents
 
+requirements = get_file_conts("./requirements.txt").split("\n")
+
+dependencies = [line for line in requirements 
+    if not line.startswith("//") or line != ""]
+
 setup(
     name="kucka",
     version="0.1.0",
-    description="Simple configuration sharing tool through Git repositories.",
+    description="Reborn Makefile.",
     long_description=get_file_conts("../README.md"),
     long_description_content_type="text/markdown",
     url="https://github.com/heizelnut/kucka",
@@ -22,6 +27,9 @@ setup(
     author_email="emalillo270304@gmail.com",
     license="MIT",
     packages=["kucka"],
-    install_requires=get_file_conts("./requirements.txt").split("\n")
+    install_requires=dependencies,
+    entry_points={
+        "console_scripts": ["kucka=kucka.cli:main"]
+    },
     zip_safe=False
 )
