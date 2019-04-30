@@ -133,7 +133,7 @@ class Kucka:
 
             # For every instruction in the directive
             for instruction in directive:
-                # Format variables: take a cup of coffee for this.
+                # Format variables - take a cup of coffee while reading this.
 
                 # Example instruction: `echo "@(greet);"`
                 # Replace every "@(" and ");" with "{" and "}",
