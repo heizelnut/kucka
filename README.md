@@ -27,7 +27,7 @@ $config:
     greet: "Hello"
 
 default:
-    - echo "$K(greet) World!"
+    - echo "$K(greet); World!"
 ```
 And after that, run `kucka` into the terminal. Play with the 
 "greet" parameter.
@@ -38,7 +38,7 @@ $config:
     compiler: "gcc"
 
 compile:
-    - $K(compiler) main.c -o main
+    - $K(compiler); main.c -o main
 
 run:
     - ./main
