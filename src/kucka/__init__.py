@@ -10,10 +10,13 @@ import yaml
 class Kucka:
     VERSION = "0.1.0"
     AUTHOR = "Heizelnut (https://github.com/heizelnut)"
+    DESCRIPTION = ("Minimalistic automation tool to build, run, install "
+        "programs and much more.")
 
     def __init__(self, directive="default"):
         # Show splash screen only if asked
-        if directive in ("--about", "-a", "--help", "-h"):
+        if directive in ("--about", "-a", "--help", "-h", 
+            "--version", "-v"):
             self.splash()
             sys.exit(0)
         
@@ -34,6 +37,10 @@ class Kucka:
         sys.stdout.write("Kucka by {} - version {}\n".format(
             self.AUTHOR, self.VERSION)
         )
+
+        # Write an infobox
+        sys.stdout.write(self.DESCRIPTION + "\n\n")
+        sys.stdout.write("Github Repo: https://github.com/heizelnut/kucka\n")
 
         # Write a splitter
         sys.stdout.write("-" * 40 + "\n")
