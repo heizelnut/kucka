@@ -135,8 +135,8 @@ class Kucka:
             for instruction in directive:
                 # Format variables: take a cup of coffee for this.
 
-                # Example instruction: `echo "@(greet);"`
-                # Replace every "@(" and ");" with "{" and "}",
+                # Example instruction: `echo "$K(greet);"`
+                # Replace every "$K(" and ");" with "{" and "}",
                 #  this way the result will be `echo "{greet}"`.
 
                 # Then, using the classic str method "format", replace
@@ -152,7 +152,7 @@ class Kucka:
                 
                 # You can swear to me now.
 
-                instruction = instruction.replace("@(", "{") \
+                instruction = instruction.replace("$K(", "{") \
                     .replace(");", "}")
                 instruction = instruction.format(**config)
                 
