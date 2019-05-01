@@ -12,11 +12,13 @@ class Kucka:
     AUTHOR = "Heizelnut (https://github.com/heizelnut)"
 
     def __init__(self, directive="default"):
-        # Show a splash every time
-        self.splash()
+        # Show splash screen only if asked
+        if directive in ("--about", "-a", "--help", "-h"):
+            self.splash()
+            sys.exit(0)
         
-        # Define valid filenames to analyze
-        self.valid_files = ["Kuckafile", "Kuckafile.yml", "Kuckafile.yaml"]
+        # Define a tuple of valid filenames to analyze
+        self.valid_files = ("Kuckafile", "Kuckafile.yml", "Kuckafile.yaml")
         
         # Set the directive
         self.directive = directive
@@ -154,8 +156,12 @@ class Kucka:
 
                 instruction = instruction.replace("$K(", "{") \
                     .replace(");", "}")
-                instruction = instruction.format(**config)
-                
+                try:
+                    instruction = instruction.format(**config)
+                except KeyError as e:
+                    self.fail(("{} is undefined, you should define"
+                        " it inside $config.").format(e))
+
                 # Execute the formatted instruction
                 os.system(instruction)
         else:
