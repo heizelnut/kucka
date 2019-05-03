@@ -142,6 +142,10 @@ class Kucka:
 
             # For every instruction in the directive
             for instruction in directive:
+                # Check if instruction is a string, ignore otherwise
+                if not isinstance(instruction, str):
+                    continue
+
                 # Format variables - take a cup of coffee while reading this.
 
                 # Example instruction: `echo "$K(greet);"`
