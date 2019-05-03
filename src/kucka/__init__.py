@@ -110,7 +110,7 @@ class Kucka:
         self.execute(yaml_content)
     
     def execute(self, content):
-        # Fail if the directive starts with an "$"
+        # Fail if the directive starts with a dollar sign ("$")
         # (it's a special character used for internal variables)
         if self.directive.startswith("$"):
             self.fail("Cannot call a special directive.")
