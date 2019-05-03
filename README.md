@@ -6,6 +6,8 @@
 -->
 
 # Kucka
+![code-size] ![fork-me]
+
 **Kucka** (`/'kutska/`) is a minimalistic **automation tool** to build, run, install programs and much more.
 
 Not [him](https://en.wikipedia.org/wiki/Juraj_Kucka),
@@ -57,3 +59,7 @@ And run it by doing `kucka compile` and then `kucka run`.
 
 ## Contributing
 If you'd like to contribute, you're free to do so! Fork my project and then pull request me.
+
+<!-- Shields -->
+[code-size]: https://img.shields.io/github/languages/code-size/heizelnut/kucka.svg?color=success&label=size
+[fork-me]: https://img.shields.io/github/forks/heizelnut/kucka.svg?label=forks
