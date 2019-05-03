@@ -29,8 +29,8 @@ class Kucka:
         # Check for Kuckafiles in the current directory
         self.target = self.check_for_kuckafile()
 
-        # Parse the file
-        self.parse()
+        # Read the file
+        self.read()
 
     def splash(self):
         # Write a header
@@ -82,8 +82,12 @@ class Kucka:
         # Flush the stderr buffer
         sys.stderr.flush()
 
-        # Exit the process
-        sys.exit(1)
+        # End the program with exit status 1
+        self.end(1)
+
+    def end(self, code=0):
+        # Exit the process with a status code
+        sys.exit(code)
 
     def check_for_kuckafile(self):
         # For every filename whitelisted
@@ -95,88 +99,118 @@ class Kucka:
         # Fail otherwise
         self.fail("Kuckafile not present in this directory.")
 
-    def parse(self):
+    def read(self):
         # Open the file and read the contents
         with open(self.target, "r") as f:
             contents = f.read()
         
         # Try to parse it with YAML - fail if there's an exception
         try:
-            yaml_content = yaml.load(contents, Loader=yaml.SafeLoader)
+            self.parsed = yaml.load(contents, Loader=yaml.SafeLoader)
         except:
             self.fail("Not valid YAML content.")
         
+        # Initialize history list
+        self.called_directives_history = []
+
+        # Get config variables
+        self.config = self.get_config()
+
         # Process the parsed content 
-        self.execute(yaml_content)
-    
-    def execute(self, content):
-        # Fail if the directive starts with a dollar sign ("$")
-        # (it's a special character used for internal variables)
-        if self.directive.startswith("$"):
-            self.fail("Cannot call a special directive.")
+        self.execute_directive(self.directive)
 
-        # Fail if the directive doesn't exist
-        if self.directive not in content:
-            message = ("Directive '{}' not "
-                "present in Kuckafile.").format(self.directive)
-            self.fail(message)
-        
-        # Initialize the config
-        config = {}
+        # Program ended fine.
+        self.end()
 
-        # Get the directive's content
-        directive = content[self.directive]
+    def parse_variables(self, instruction):
+        # Parse variables - take a cup of coffee while reading this.
 
+        # Example instruction: `echo "$K(greet);"`
+        # Replace every "$K(" and ");" with "{" and "}",
+        #  this way the result will be `echo "{greet}"`.
+
+        # Then, using the classic str method "format", replace
+        #  every occurency with the corresponding value of the
+        #  "config" dict.
+
+        # So, if before we defined:
+        # ```
+        # $config:
+        #   greet: "hello world"
+        # ```
+        # the result will be `echo "hello world"`.
+                
+        # You can swear to me now.
+
+        template = instruction.replace("$K(", "{") \
+            .replace(");", "}")
+        try:
+            compiled = template.format(**self.config)
+        except KeyError as e:
+            self.fail(("{} is undefined, you should define"
+                " it inside $config.").format(e))
+
+        return compiled
+
+    def get_config(self):
         # If there's a "$config" variable,
         #  check if it's a dict and store it temporarily.
         # Fail if it's not a dict.
-        if "$config" not in content:
+        if "$config" not in self.parsed:
             self.warn("Config directive not found.")
+            return {}
         else:
-            config = content["$config"]
-            if type(config) is not dict:
+            config = self.parsed["$config"]
+            if not isinstance(config, dict):
                 self.fail("Config directive is malformed.")
+            return config
 
-        # Check if directive's content is a list - otherwise fail.
-        if type(directive) is list:
+    def execute_directive(self, name):
+        # Fail if the directive starts with a dollar sign ("$")
+        # (it's a special character used for internal variables)
+        if name.startswith("$"):
+            self.fail("Cannot call a special directive.")
 
-            # For every instruction in the directive
-            for instruction in directive:
-                # Check if instruction is a string, ignore otherwise
-                if not isinstance(instruction, str):
-                    continue
-
-                # Format variables - take a cup of coffee while reading this.
-
-                # Example instruction: `echo "$K(greet);"`
-                # Replace every "$K(" and ");" with "{" and "}",
-                #  this way the result will be `echo "{greet}"`.
-
-                # Then, using the classic str method "format", replace
-                #  every occurency with the corresponding value of the
-                #  "config" dict.
-
-                # So, if before we defined:
-                # ```
-                # $config:
-                #   greet: "hello world"
-                # ```
-                # the result will be `echo "hello world"`.
-                
-                # You can swear to me now.
-
-                instruction = instruction.replace("$K(", "{") \
-                    .replace(");", "}")
-                try:
-                    instruction = instruction.format(**config)
-                except KeyError as e:
-                    self.fail(("{} is undefined, you should define"
-                        " it inside $config.").format(e))
-
-                # Execute the formatted instruction
-                os.system(instruction)
-        else:
-            self.fail("Directive '{}' is not a list.".format(self.directive))
+        # Fail if the directive doesn't exist
+        if name not in self.parsed:
+            message = ("Directive '{}' not "
+                "present in Kuckafile.").format(name)
+            self.fail(message)
         
-        # All's fine - end the program.
-        self.log("Done.")
+        # Fail if it was already called - prevents infinite loop
+        if name in self.called_directives_history:
+            self.fail("Infinite loop detected.")
+        else:
+            self.called_directives_history.append(name)
+        
+        # Read directive's content
+        directive = self.parsed[name]
+
+        # Fail if directive isn't a list
+        if not isinstance(directive, list):
+            self.fail("Directive '{}' is not a list.".format(name))
+        
+        # Cycle through directive
+        for instruction in directive:
+            # Check if instruction is a dict
+            if isinstance(instruction, dict):
+                # If it's got a "goto" in there, call another directive
+                #   otherwise, continue
+                if "goto" in instruction:
+                    target_directive = instruction["goto"]
+
+                    # Prevent locking loop
+                    if target_directive == name:
+                        self.fail("A directive cannot call itself.")
+
+                    # Execute directive recursively
+                    self.execute_directive(target_directive)
+                
+                continue
+
+            # Check if instruction is a string, ignore otherwise
+            if not isinstance(instruction, str):
+                continue
+
+            # Execute the instruction with parsed variables
+            os.system(self.parse_variables(instruction))
