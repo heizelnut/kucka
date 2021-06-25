@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Heizelnut (Emanuele Lillo)
+# Copyright (c) 2019 Heizelnut
 # 
 # This software is released under the MIT License.
 # https://opensource.org/licenses/MIT
@@ -24,7 +24,6 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/heizelnut/kucka",
     author="Heizelnut",
-    author_email="emalillo270304@gmail.com",
     license="MIT",
     packages=["kucka"],
     install_requires=dependencies,
